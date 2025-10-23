@@ -31,7 +31,7 @@ function showTab(tab) {
 }
 
 async function loadYears() {
-  const { data, error } = await supabase.from("pdf_files").select("year_level");
+  const { data, error } = await supabase.from("pdfs").select("year_level");
   if (error) return console.error(error);
   yearLevels = [...new Set(data.map((d) => d.year_level))];
   renderYearButtons();
@@ -49,7 +49,7 @@ function renderYearButtons() {
 
 async function loadPDFsByYear(year) {
   const { data, error } = await supabase
-    .from("pdf_files")
+    .from("pdfs")
     .select("*")
     .eq("year_level", year)
     .order("subject", { ascending: true });
@@ -97,7 +97,7 @@ async function loadRecent() {
 
   const { data, error } = await supabase
     .from("recent_views")
-    .select("*, pdf_files(title, subject, year_level, file_url)")
+    .select("*, pdfs(title, subject, year_level, file_url)")
     .eq("user_id", currentUser.id)
     .order("viewed_at", { ascending: false })
     .limit(10);
@@ -111,7 +111,7 @@ async function loadRecent() {
   }
 
   data.forEach((r) => {
-    const pdf = r.pdf_files;
+    const pdf = r.pdfs;
     const div = document.createElement("div");
     div.classList.add("recent-item");
     div.textContent = `${pdf.year_level} | ${pdf.subject} — ${pdf.title}`;
