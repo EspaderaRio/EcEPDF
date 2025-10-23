@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e293b">
   <title>Online PDF Viewer</title>
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e293b">
 </head>
 <body>
   <!-- ========== Login Section ========== -->
@@ -50,5 +50,11 @@
 
   <script type="module" src="auth.js"></script>
   <script type="module" src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+  .then(() => console.log('Service Worker registered'));
+}
+</script>
 </body>
 </html>
