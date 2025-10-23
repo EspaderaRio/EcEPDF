@@ -4,13 +4,13 @@
   box-sizing: border-box;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
-
 body {
   margin: 0;
-  background: #f9fafb;
+  background: linear-gradient(135deg, #f0f4f8, #e2e8f0);
   color: #111827;
-  line-height: 1.5;
+  line-height: 1.6;
   font-size: 16px;
+  transition: background 0.3s ease;
 }
 
 /* =========================== */
@@ -22,18 +22,18 @@ body {
 }
 
 #googleSignInBtn {
-  background: #4285f4;
+  background: linear-gradient(135deg, #4285f4, #3367d6);
   color: white;
-  border: none;
   padding: 0.75rem 2rem;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 12px;
   font-size: 1.1rem;
-  transition: background 0.3s ease;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
 }
-
 #googleSignInBtn:hover {
-  background: #3367d6;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }
 
 .auth-message {
@@ -55,13 +55,16 @@ body {
 /* =========================== */
 /* App UI */
 header {
-  background: #1e293b;
-  color: white;
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(10px);
+  color: #f9fafb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  flex-wrap: wrap;
+  padding: 0.75rem 1.5rem;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
 
 header span {
@@ -148,10 +151,16 @@ nav button:hover {
   width: 100%;
   max-width: 400px;
   margin: 0.5rem 0 1rem 0;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   font-size: 1rem;
+  transition: all 0.3s ease;
+}
+#searchInput:focus {
+  outline: none;
+  box-shadow: 0 6px 18px rgba(59,130,246,0.3);
 }
 
 /* =========================== */
@@ -160,20 +169,35 @@ nav button:hover {
 .recent-item {
   background: white;
   margin: 0.5rem 0;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  cursor: pointer;
-  border: 1px solid #e2e8f0;
-  transition: background 0.3s ease, transform 0.15s ease;
-  word-wrap: break-word;
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(203,213,225,0.5);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
 }
-
 .pdf-item:hover,
 .recent-item:hover {
   background: #f1f5f9;
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
 }
 
+.pdf-item,
+.recent-item,
+#yearButtons button,
+nav button,
+header button {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+#yearButtons button:hover,
+nav button:hover,
+header button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
 /* =========================== */
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -191,7 +215,6 @@ nav button:hover {
     flex: 1 1 calc(50% - 0.5rem);
     text-align: center;
   }
-
   .pdf-item,
   .recent-item {
     font-size: 0.95rem;
@@ -204,10 +227,9 @@ nav button:hover {
 }
 
 @media (max-width: 480px) {
-  #yearButtons button {
+ #yearButtons button {
     flex: 1 1 100%;
   }
-
   nav button {
     flex: 1 1 45%;
     margin-bottom: 0.3rem;
