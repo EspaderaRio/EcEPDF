@@ -11,6 +11,9 @@ const appSection = document.getElementById("appSection");
 const userInfo = document.getElementById("userInfo");
 const logoutBtn = document.getElementById("logoutBtn");
 
+// Replace with your GitHub Pages repo path
+const BASE_PATH = "/EcEPDF/";
+
 // Check if user is already logged in on page load
 async function checkSession() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -33,9 +36,9 @@ function showApp(user) {
   appSection.classList.remove("hidden");
   userInfo.textContent = user.email;
 
-  // Clean the URL after OAuth redirect
-  if (window.location.hash) {
-    history.replaceState(null, null, window.location.pathname);
+  // Clean OAuth tokens from URL
+  if (window.location.hash.includes("access_token")) {
+    history.replaceState(null, null, BASE_PATH);
   }
 }
 
@@ -47,11 +50,15 @@ googleSignInBtn.addEventListener("click", async () => {
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: window.location.origin }
+    options: { redirectTo: window.location.origin + BASE_PATH }
   });
 
-  if (error) authMessage.textContent = `Error: ${error.message}`;
-  else authMessage.textContent = "Please check your email to confirm your account if required.";
+  if (error) {
+    authMessage.textContent = `Error: ${error.message}`;
+  } else {
+    // Optional: message while waiting for login
+    authMessage.textContent = "Logging you in… please wait.";
+  }
 });
 
 // Logout
@@ -60,7 +67,7 @@ logoutBtn.addEventListener("click", async () => {
   showLogin();
 });
 
-// Listen for auth changes (optional, handles multi-tab login)
+// Listen for auth changes
 supabase.auth.onAuthStateChange((_event, session) => {
   if (session?.user) showApp(session.user);
   else showLogin();
