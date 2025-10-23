@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study PDF Viewer</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>EcE PDF Viewer</h1>
+    <nav>
+      <button id="profileTab">Profile</button>
+      <button id="yearTab">Year</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Profile Tab -->
+    <section id="profileSection" class="tab">
+      <h2>Your Profile</h2>
+      <p>Welcome to your study portal!</p>
+    </section>
+
+    <!-- Year Tab -->
+    <section id="yearSection" class="tab hidden">
+      <h2>Select Year</h2>
+      <div id="yearButtons"></div>
+
+      <div id="searchContainer" class="hidden">
+        <input type="text" id="searchInput" placeholder="Search PDF title..." />
+      </div>
+
+      <div id="pdfList" class="pdf-list"></div>
+    </section>
+  </main>
+
+  <script src="https://esm.sh/@supabase/supabase-js@2.33.0"></script>
+  <script src="script.js" type="module"></script>
+</body>
+</html>
