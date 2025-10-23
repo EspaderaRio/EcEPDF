@@ -1,8 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.33.0";
-
-const SUPABASE_URL = "https://xkrsudwjbeaizzygggvg.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrcnN1ZHdqYmVhaXp6eWdnZ3ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyMTk1MjIsImV4cCI6MjA3Njc5NTUyMn0.sKxiPDLQZDYoxyffwlu8bO-Kcbazm0pt_EL1gaJslMc";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { supabase } from "./auth.js";
 
 const profileTab = document.getElementById("profileTab");
 const yearTab = document.getElementById("yearTab");
@@ -12,9 +8,17 @@ const yearButtons = document.getElementById("yearButtons");
 const searchContainer = document.getElementById("searchContainer");
 const searchInput = document.getElementById("searchInput");
 const pdfList = document.getElementById("pdfList");
+const recentList = document.getElementById("recentList");
 
+let currentUser = null;
 let allPDFs = [];
 let yearLevels = [];
+
+// Watch for auth
+supabase.auth.onAuthStateChange((_event, session) => {
+  currentUser = session?.user ?? null;
+  if (currentUser) loadYears();
+});
 
 profileTab.addEventListener("click", () => showTab("profile"));
 yearTab.addEventListener("click", () => showTab("year"));
@@ -23,14 +27,12 @@ searchInput.addEventListener("input", handleSearch);
 function showTab(tab) {
   profileSection.classList.toggle("hidden", tab !== "profile");
   yearSection.classList.toggle("hidden", tab !== "year");
+  if (tab === "profile") loadRecent();
 }
 
 async function loadYears() {
   const { data, error } = await supabase.from("pdf_files").select("year_level");
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (error) return console.error(error);
   yearLevels = [...new Set(data.map((d) => d.year_level))];
   renderYearButtons();
 }
@@ -52,11 +54,7 @@ async function loadPDFsByYear(year) {
     .eq("year_level", year)
     .order("subject", { ascending: true });
 
-  if (error) {
-    console.error(error);
-    return;
-  }
-
+  if (error) return console.error(error);
   allPDFs = data;
   searchContainer.classList.remove("hidden");
   renderPDFList(data);
@@ -81,19 +79,43 @@ function handleSearch() {
   renderPDFList(filtered);
 }
 
-// Opens PDF in Mozilla's online viewer
-function openInMozillaViewer(pdf) {
-  // Ensure file_url exists or build it manually if only subject/year are stored
-  let fileUrl = pdf.file_url;
-  if (!fileUrl) {
-    const safeSubject = pdf.subject.toLowerCase().replace(/\s+/g, "_");
-    const safeYear = pdf.year_level.toLowerCase().replace(/\s+/g, "");
-    fileUrl = `${SUPABASE_URL}/storage/v1/object/public/pdfs/${safeYear}/${safeSubject}.pdf`;
-  }
-
+async function openInMozillaViewer(pdf) {
   const mozillaViewer = "https://mozilla.github.io/pdf.js/web/viewer.html?file=";
-  window.open(mozillaViewer + encodeURIComponent(fileUrl), "_blank");
+  const pdfUrl = encodeURIComponent(pdf.file_url);
+  window.open(mozillaViewer + pdfUrl, "_blank");
+
+  // Save to Supabase recent_views
+  if (!currentUser) return;
+  await supabase.from("recent_views").insert({
+    user_id: currentUser.id,
+    pdf_id: pdf.id,
+  });
 }
 
-// Initialize app
-loadYears();
+async function loadRecent() {
+  if (!currentUser) return;
+
+  const { data, error } = await supabase
+    .from("recent_views")
+    .select("*, pdf_files(title, subject, year_level, file_url)")
+    .eq("user_id", currentUser.id)
+    .order("viewed_at", { ascending: false })
+    .limit(10);
+
+  if (error) return console.error(error);
+
+  recentList.innerHTML = "";
+  if (!data.length) {
+    recentList.textContent = "No recently viewed PDFs.";
+    return;
+  }
+
+  data.forEach((r) => {
+    const pdf = r.pdf_files;
+    const div = document.createElement("div");
+    div.classList.add("recent-item");
+    div.textContent = `${pdf.year_level} | ${pdf.subject} — ${pdf.title}`;
+    div.onclick = () => openInMozillaViewer(pdf);
+    recentList.appendChild(div);
+  });
+}
