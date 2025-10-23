@@ -56,5 +56,31 @@
   .then(() => console.log('Service Worker registered'));
 }
 </script>
+  <button id="installBtn" style="position:fixed; bottom:20px; right:20px; padding:0.8rem 1.5rem; background:#3b82f6; color:white; border:none; border-radius:12px; cursor:pointer; box-shadow:0 6px 12px rgba(0,0,0,0.2);">Install App</button>
+
+<script>
+let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+
+installBtn.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    }
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  }
+});
+</script>
+
+  
 </body>
 </html>
