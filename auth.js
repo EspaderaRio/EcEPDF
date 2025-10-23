@@ -11,51 +11,60 @@ const appSection = document.getElementById("appSection");
 const userInfo = document.getElementById("userInfo");
 const logoutBtn = document.getElementById("logoutBtn");
 
+// Check if user is already logged in on page load
+async function checkSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    showApp(session.user);
+  } else {
+    showLogin();
+  }
+}
+
+// Show login screen
+function showLogin() {
+  loginSection.classList.remove("hidden");
+  appSection.classList.add("hidden");
+}
+
+// Show main app
+function showApp(user) {
+  loginSection.classList.add("hidden");
+  appSection.classList.remove("hidden");
+  userInfo.textContent = user.email;
+
+  // Clean the URL after OAuth redirect
+  if (window.location.hash) {
+    history.replaceState(null, null, window.location.pathname);
+  }
+}
+
 // Google Sign-In
 googleSignInBtn.addEventListener("click", async () => {
-  // Show initial message
   authMessage.textContent = "Redirecting to Google...";
   authMessage.classList.remove("hidden");
   authMessage.classList.add("visible");
 
-  try {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin
-      }
-    });
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: window.location.origin }
+  });
 
-    if (error) {
-      authMessage.textContent = `Error: ${error.message}`;
-    } else {
-      // Show message instructing user to check their email (if confirmation is required)
-      authMessage.textContent = "Please check your email to confirm your account before continuing.";
-    }
-  } catch (err) {
-    authMessage.textContent = `Error: ${err.message}`;
-  }
+  if (error) authMessage.textContent = `Error: ${error.message}`;
+  else authMessage.textContent = "Please check your email to confirm your account if required.";
 });
 
 // Logout
 logoutBtn.addEventListener("click", async () => {
   await supabase.auth.signOut();
-  loginSection.classList.remove("hidden");
-  appSection.classList.add("hidden");
+  showLogin();
 });
 
-// Auth session listener
+// Listen for auth changes (optional, handles multi-tab login)
 supabase.auth.onAuthStateChange((_event, session) => {
-  if (session?.user) {
-    loginSection.classList.add("hidden");
-    appSection.classList.remove("hidden");
-    userInfo.textContent = session.user.email;
-
-    // Hide auth message after successful login
-    authMessage.classList.remove("visible");
-    authMessage.classList.add("hidden");
-  } else {
-    loginSection.classList.remove("hidden");
-    appSection.classList.add("hidden");
-  }
+  if (session?.user) showApp(session.user);
+  else showLogin();
 });
+
+// Run on page load
+checkSession();
